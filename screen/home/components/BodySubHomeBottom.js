@@ -27,7 +27,8 @@ const Bodysubhomebottom = props => {
   };
   const listItem = ({index, item}) => {
     return (
-      <TouchableOpacity onPress={() => props.navigation.navigate('Liked')}>
+      <TouchableOpacity
+        onPress={() => props.navigation.navigate('FoodDetail', {item: item})}>
         <View style={styles.container__item} key={index}>
           <View style={styles.container__item__image}>
             <Image

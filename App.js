@@ -21,6 +21,7 @@ import {
   faHeart,
   faUser,
 } from '@fortawesome/free-solid-svg-icons';
+import Fooddetailscreen from './screen/food_detail/FoodDetailScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator(); // creates object for Stack Navigator
 
@@ -42,7 +43,7 @@ export default class App extends Component {
           headerShown: false,
         }}>
         <Stack.Screen name="Home" component={Homescreen} />
-        <Stack.Screen name="Liked" component={Likedscreen} />
+        <Stack.Screen name="FoodDetail" component={Fooddetailscreen} />
       </Stack.Navigator>
     );
   };
