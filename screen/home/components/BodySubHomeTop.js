@@ -8,8 +8,8 @@ import {
   TouchableOpacity,
   FlatList,
 } from 'react-native';
-import {icons, COLORS, categoryData} from '../../../assets/datas/Contant';
-
+import {categoryData} from '../../../assets/datas/Contant';
+import Colors from '../../../assets/datas/Colors';
 const Bodysubhometop = props => {
   const [clicked, setClicked] = useState([true, false, false, false]);
   const onClick = (index, id) => {
@@ -29,10 +29,10 @@ const Bodysubhometop = props => {
             styles.container__item,
             clicked[index]
               ? {
-                  backgroundColor: COLORS.primary,
+                  backgroundColor: Colors.primary,
                 }
               : {
-                  backgroundColor: COLORS.white,
+                  backgroundColor: Colors.white,
                 },
           )}>
           <View style={styles.container__item__image}>
@@ -46,10 +46,10 @@ const Bodysubhometop = props => {
               styles.container__item__text,
               clicked[index]
                 ? {
-                    color: COLORS.white,
+                    color: Colors.white,
                   }
                 : {
-                    color: 'black',
+                    color: Colors.primary,
                   },
             )}>
             {item.name}
@@ -79,9 +79,10 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     borderRadius: 30,
     alignItems: 'center',
+    marginRight: 10,
   },
   container__item__image: {
-    backgroundColor: COLORS.white,
+    backgroundColor: Colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     width: 50,
@@ -93,7 +94,7 @@ const styles = StyleSheet.create({
     height: 20,
   },
   container__item__text: {
-    color: COLORS.white,
+    color: Colors.primary,
     fontSize: 13,
     marginTop: 10,
     fontWeight: '500',

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useReducer} from 'react';
 import {
   View,
   StyleSheet,
@@ -8,8 +8,10 @@ import {
   Image,
 } from 'react-native';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
-import {faFire} from '@fortawesome/free-solid-svg-icons';
-import {COLORS} from '../../../assets/datas/Contant';
+import {faFire, faLocationDot} from '@fortawesome/free-solid-svg-icons';
+import {faCcMastercard} from '@fortawesome/free-brands-svg-icons';
+import Colors from '../../../assets/datas/Colors';
+
 const BodyFoodDetail = props => {
   const [state, changeState] = useState(0);
   const change = ({nativeEvent}) => {
@@ -21,6 +23,55 @@ const BodyFoodDetail = props => {
     }
   };
   const item = props.item.menu;
+  const initialState = item.map(x => ({
+    name: x.name,
+    price: x.price,
+    amount: 0,
+    calories: x.calories,
+  }));
+  // const [amount, changeAmount] = useState(
+  //   item.map(x => {
+  //     return {
+  //       name: x.name,
+  //       price: x.price,
+  //       amount: 0,
+  //       calories: x.calories,
+  //     };
+  //   }),
+  // );
+  // const decreaseAmount = name => {
+  //   const result = [...amount];
+  //   const index = result.findIndex(x => x.name === name);
+  //   if (result[index].amount > 0) {
+  //     result[index].amount--;
+  //     changeAmount(result);
+  //   }
+  // };
+  // const increaseAmount = name => {
+  //   const result = [...amount];
+  //   const index = result.findIndex(x => x.name === name);
+  //   result[index].amount++;
+  //   changeAmount(result);
+  // };  cach state
+  const [stateAmount, dispatch] = useReducer(reducer, initialState);
+  const amount = name => {
+    const index = stateAmount.findIndex(x => x.name === name);
+    return stateAmount[index].amount;
+  };
+  const itemsInCart = () => {
+    return stateAmount.reduce((acc, item) => {
+      return acc + item.amount;
+    }, 0);
+  };
+  const moneyInCart = () => {
+    return stateAmount.reduce((acc, item) => {
+      return acc + item.amount * item.price;
+    }, 0);
+  };
+  const calorieAmount = name => {
+    const index = stateAmount.findIndex(x => x.name === name);
+    return stateAmount[index].amount * stateAmount[index].calories;
+  };
   const renderItem = ({item}) => {
     return (
       <View style={styles.container__item}>
@@ -30,19 +81,21 @@ const BodyFoodDetail = props => {
             source={item.photo}
           />
           <View style={styles.container__item__container__amount}>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => dispatch({type: 'decrease', name: item.name})}>
               <Text
                 style={[
                   styles.container__item__container__amount__button,
-                  {color: COLORS.secondary},
+                  {color: Colors.secondary},
                 ]}>
                 -
               </Text>
             </TouchableOpacity>
             <Text style={styles.container__item__container__amount__text}>
-              {1}
+              {amount(item.name)}
             </Text>
-            <TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => dispatch({type: 'increase', name: item.name})}>
               <Text style={styles.container__item__container__amount__button}>
                 +
               </Text>
@@ -52,45 +105,83 @@ const BodyFoodDetail = props => {
         <Text style={styles.container__item__text}>
           {item.name} - ${item.price}
         </Text>
-        <Text numberOfLines={2} style={styles.container__item__text_1}>
-          {item.description}
-        </Text>
+        <Text style={styles.container__item__text_1}>{item.description}</Text>
         <View style={styles.container__item__bottom}>
-          <FontAwesomeIcon icon={faFire} size={20} color={'red'} />
+          <FontAwesomeIcon icon={faFire} size={20} color={Colors.primaryDark} />
           <Text style={styles.container__item__bottom__text}>
-            {item.calories}
+            {calorieAmount(item.name)} cal
           </Text>
         </View>
       </View>
     );
   };
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={item}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        renderItem={renderItem}
-        pagingEnabled
-        onScroll={change}
-      />
-      <View style={styles.pagination}>
-        {item.map((i, k) => (
-          <Text
-            style={k === state ? styles.paginText : styles.pageinActiveText}>
-            ⬤
-          </Text>
-        ))}
+    <View>
+      <View style={styles.container}>
+        <FlatList
+          data={item}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          renderItem={renderItem}
+          pagingEnabled
+          onScroll={change}
+        />
+        <View style={styles.pagination}>
+          {item.map((i, k) => (
+            <Text
+              style={k === state ? styles.paginText : styles.pageinActiveText}>
+              ⬤
+            </Text>
+          ))}
+        </View>
+      </View>
+      <View style={styles.container__cart}>
+        <Text style={styles.container__cart__amount}>
+          {itemsInCart()} items in cart
+        </Text>
+        <Text style={styles.container__cart__money}>${moneyInCart()}</Text>
+      </View>
+      <View style={styles.container__info}>
+        <View style={styles.container__info__left}>
+          <FontAwesomeIcon
+            icon={faLocationDot}
+            size={20}
+            color={Colors.primaryDark}
+          />
+          <Text style={styles.container__info__address}>745 Lincoln PI</Text>
+        </View>
+        <View style={styles.container__info__rights}>
+          <FontAwesomeIcon
+            icon={faCcMastercard}
+            size={20}
+            color={Colors.primaryDark}
+          />
+          <Text style={styles.container__info__cart}>....5491</Text>
+        </View>
       </View>
     </View>
   );
 };
-
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'increase':
+      return state.map(x =>
+        x.name === action.name ? {...x, amount: x.amount + 1} : {...x},
+      );
+    case 'decrease':
+      return state.map(x =>
+        x.name === action.name
+          ? {...x, amount: Math.max(x.amount - 1, 0)}
+          : {...x},
+      );
+    default:
+      return state;
+  }
+};
 const styles = StyleSheet.create({
   container: {
     padding: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
+
     paddingTop: 10,
   },
   container__item: {
@@ -105,9 +196,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   container__item__container__image: {
-    width: 220,
-    height: 220,
-    borderRadius: 110,
+    width: 250,
+    height: 250,
+    borderRadius: 125,
   },
   container__item__container__amount: {
     position: 'absolute',
@@ -116,19 +207,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: COLORS.white,
+    backgroundColor: Colors.white,
     padding: 5,
     width: '50%',
     borderRadius: 30,
   },
   container__item__container__amount__button: {
-    fontSize: 25,
+    color: Colors.primaryDark,
+    fontSize: 18,
   },
   container__item__container__amount__text: {
-    fontSize: 25,
+    color: Colors.primaryDark,
+    fontSize: 18,
   },
   container__item__text: {
-    fontSize: 25,
+    fontSize: 18,
+    color: Colors.primaryDark,
     marginTop: 20,
     marginBottom: 20,
     fontWeight: '500',
@@ -139,18 +233,63 @@ const styles = StyleSheet.create({
   },
   pagination: {
     position: 'absolute',
-    bottom: 30,
     flexDirection: 'row',
+    bottom: '10%',
     alignSelf: 'center',
   },
   paginText: {
-    color: COLORS.primary,
+    color: Colors.primaryDark,
     fontSize: 10,
     marginLeft: 10,
   },
   pageinActiveText: {
-    color: COLORS.secondary,
+    color: Colors.white,
     fontSize: 10,
+    marginLeft: 10,
+  },
+  container__cart: {
+    paddingRight: 20,
+    paddingLeft: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  container__cart__amount: {
+    color: Colors.primaryDark,
+    fontSize: 18,
+  },
+  container__cart__money: {
+    color: Colors.primaryDark,
+    fontSize: 18,
+  },
+  container__item__text_1: {
+    fontSize: 18,
+    color: Colors.primaryDark,
+  },
+  container__info: {
+    flexDirection: 'row',
+    padding: 20,
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  container__info__left: {
+    flexDirection: 'row',
+  },
+  container__info__address: {
+    fontSize: 18,
+    color: Colors.primaryDark,
+    marginLeft: 10,
+  },
+  container__info__rights: {
+    flexDirection: 'row',
+  },
+  container__info__cart: {
+    fontSize: 18,
+    color: Colors.primaryDark,
+    marginLeft: 10,
+  },
+  container__item__bottom__text: {
+    fontSize: 18,
+    color: Colors.primaryDark,
     marginLeft: 10,
   },
 });

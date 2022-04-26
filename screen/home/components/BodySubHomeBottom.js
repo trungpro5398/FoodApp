@@ -12,10 +12,12 @@ import {
   icons,
   categoryData,
   COLORS,
+  initialCurrentLocation,
 } from '../../../assets/datas/Contant';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {faStar} from '@fortawesome/free-solid-svg-icons';
 const Bodysubhomebottom = props => {
+  const data = restaurantData.filter(x => x.categories.includes(props.index));
   const listCategory = item => {
     return item.map(i => {
       return (
@@ -28,7 +30,14 @@ const Bodysubhomebottom = props => {
   const listItem = ({index, item}) => {
     return (
       <TouchableOpacity
-        onPress={() => props.navigation.navigate('FoodDetail', {item: item})}>
+        onPress={() =>
+          props.navigation.navigate('FoodDetail', {
+            item: item,
+            initialCoordinate: initialCurrentLocation,
+            resCoordinate: data[0].location,
+            navigation: props.navigation,
+          })
+        }>
         <View style={styles.container__item} key={index}>
           <View style={styles.container__item__image}>
             <Image
@@ -56,7 +65,7 @@ const Bodysubhomebottom = props => {
   return (
     <View>
       <FlatList
-        data={restaurantData.filter(x => x.categories.includes(props.index))}
+        data={data}
         renderItem={listItem}
         showsVerticalScrollIndicator={false}
       />
@@ -86,7 +95,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     alignItems: 'center',
     justifyContent: 'center',
-    borderTopRightRadius: 30,
+    borderTopRightRadius: 20,
+    borderBottomLeftRadius: 20,
   },
   container__item__text: {
     marginTop: 10,
