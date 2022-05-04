@@ -1,18 +1,14 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {View, StyleSheet, Text} from 'react-native';
 import Bodysubhometop from './BodySubHomeTop';
 import Bodysubhomebottom from './BodySubHomeBottom';
 const Bodyhome = props => {
-  const [index, setIndex] = useState(1);
-  const onClick = index => {
-    setIndex(index);
-  };
   return (
     <View style={styles.container}>
       <Text style={styles.container__text}>Main</Text>
       <Text style={styles.container__text}>Categories</Text>
-      <Bodysubhometop onClick={onClick} />
-      <Bodysubhomebottom index={index} navigation={props.navigation} />
+      <Bodysubhometop />
+      <Bodysubhomebottom navigation={props.navigation} />
     </View>
   );
 };

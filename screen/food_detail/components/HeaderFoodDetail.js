@@ -6,12 +6,14 @@ import {faArrowLeft} from '@fortawesome/free-solid-svg-icons';
 import Colors from '../../../assets/datas/Colors';
 
 const HeaderFoodDetail = props => {
+  const {
+    navigation: {goBack},
+  } = props;
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => props.navigation.navigate('Home')}>
+      <TouchableOpacity onPress={() => goBack()}>
         <FontAwesomeIcon
           icon={faArrowLeft}
-          ß
           size={20}
           color={Colors.primaryDark}
         />

@@ -9,15 +9,19 @@ import {
 } from 'react-native';
 import {
   restaurantData,
-  icons,
   categoryData,
   COLORS,
   initialCurrentLocation,
 } from '../../../assets/datas/Contant';
 import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {faStar} from '@fortawesome/free-solid-svg-icons';
+import {useSelector} from 'react-redux';
 const Bodysubhomebottom = props => {
-  const data = restaurantData.filter(x => x.categories.includes(props.index));
+  const index = useSelector(state => state.indexItem.value);
+  const data = restaurantData.filter(x => x.categories.includes(index));
+  const {
+    navigation: {navigate},
+  } = props;
   const listCategory = item => {
     return item.map(i => {
       return (
@@ -31,7 +35,7 @@ const Bodysubhomebottom = props => {
     return (
       <TouchableOpacity
         onPress={() =>
-          props.navigation.navigate('FoodDetail', {
+          navigate('FoodDetail', {
             item: item,
             initialCoordinate: initialCurrentLocation,
             resCoordinate: data[0].location,

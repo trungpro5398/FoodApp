@@ -1,4 +1,4 @@
-import React, {useState, useReducer} from 'react';
+import React, {useState} from 'react';
 import {
   View,
   StyleSheet,
@@ -11,7 +11,8 @@ import {FontAwesomeIcon} from '@fortawesome/react-native-fontawesome';
 import {faFire, faLocationDot} from '@fortawesome/free-solid-svg-icons';
 import {faCcMastercard} from '@fortawesome/free-brands-svg-icons';
 import Colors from '../../../assets/datas/Colors';
-
+import {useSelector, useDispatch} from 'react-redux';
+import {decreaseAmount, increaseAmount} from '../features/amountSlice';
 const BodyFoodDetail = props => {
   const [state, changeState] = useState(0);
   const change = ({nativeEvent}) => {
@@ -23,53 +24,32 @@ const BodyFoodDetail = props => {
     }
   };
   const item = props.item.menu;
-  const initialState = item.map(x => ({
-    name: x.name,
-    price: x.price,
-    amount: 0,
-    calories: x.calories,
-  }));
-  // const [amount, changeAmount] = useState(
-  //   item.map(x => {
-  //     return {
-  //       name: x.name,
-  //       price: x.price,
-  //       amount: 0,
-  //       calories: x.calories,
-  //     };
-  //   }),
-  // );
-  // const decreaseAmount = name => {
-  //   const result = [...amount];
-  //   const index = result.findIndex(x => x.name === name);
-  //   if (result[index].amount > 0) {
-  //     result[index].amount--;
-  //     changeAmount(result);
-  //   }
-  // };
-  // const increaseAmount = name => {
-  //   const result = [...amount];
-  //   const index = result.findIndex(x => x.name === name);
-  //   result[index].amount++;
-  //   changeAmount(result);
-  // };  cach state
-  const [stateAmount, dispatch] = useReducer(reducer, initialState);
-  const amount = name => {
-    const index = stateAmount.findIndex(x => x.name === name);
-    return stateAmount[index].amount;
+
+  const count = useSelector(state => state.amount.value);
+  const dispatch = useDispatch();
+  const getAmount = (nameRes, nameFood) => {
+    const indexRes = count.findIndex(x => x.name == nameRes);
+    const indexItem = count[indexRes].menu.findIndex(x => x.name == nameFood);
+    return count[indexRes].menu[indexItem].amount;
   };
-  const itemsInCart = () => {
+  const itemsInCart = nameRes => {
+    const indexRes = count.findIndex(x => x.name == nameRes);
+    const stateAmount = count[indexRes].menu;
     return stateAmount.reduce((acc, item) => {
       return acc + item.amount;
     }, 0);
   };
-  const moneyInCart = () => {
+  const moneyInCart = nameRes => {
+    const indexRes = count.findIndex(x => x.name == nameRes);
+    const stateAmount = count[indexRes].menu;
     return stateAmount.reduce((acc, item) => {
       return acc + item.amount * item.price;
     }, 0);
   };
-  const calorieAmount = name => {
-    const index = stateAmount.findIndex(x => x.name === name);
+  const calorieAmount = (nameRes, nameItem) => {
+    const indexRes = count.findIndex(x => x.name == nameRes);
+    const stateAmount = count[indexRes].menu;
+    const index = stateAmount.findIndex(x => x.name === nameItem);
     return stateAmount[index].amount * stateAmount[index].calories;
   };
   const renderItem = ({item}) => {
@@ -82,7 +62,14 @@ const BodyFoodDetail = props => {
           />
           <View style={styles.container__item__container__amount}>
             <TouchableOpacity
-              onPress={() => dispatch({type: 'decrease', name: item.name})}>
+              onPress={() =>
+                dispatch(
+                  decreaseAmount({
+                    nameRes: props.item.name,
+                    nameItem: item.name,
+                  }),
+                )
+              }>
               <Text
                 style={[
                   styles.container__item__container__amount__button,
@@ -92,10 +79,17 @@ const BodyFoodDetail = props => {
               </Text>
             </TouchableOpacity>
             <Text style={styles.container__item__container__amount__text}>
-              {amount(item.name)}
+              {getAmount(props.item.name, item.name)}
             </Text>
             <TouchableOpacity
-              onPress={() => dispatch({type: 'increase', name: item.name})}>
+              onPress={() =>
+                dispatch(
+                  increaseAmount({
+                    nameRes: props.item.name,
+                    nameItem: item.name,
+                  }),
+                )
+              }>
               <Text style={styles.container__item__container__amount__button}>
                 +
               </Text>
@@ -109,7 +103,7 @@ const BodyFoodDetail = props => {
         <View style={styles.container__item__bottom}>
           <FontAwesomeIcon icon={faFire} size={20} color={Colors.primaryDark} />
           <Text style={styles.container__item__bottom__text}>
-            {calorieAmount(item.name)} cal
+            {calorieAmount(props.item.name, item.name)} cal
           </Text>
         </View>
       </View>
@@ -137,9 +131,11 @@ const BodyFoodDetail = props => {
       </View>
       <View style={styles.container__cart}>
         <Text style={styles.container__cart__amount}>
-          {itemsInCart()} items in cart
+          {itemsInCart(props.item.name)} items in cart
         </Text>
-        <Text style={styles.container__cart__money}>${moneyInCart()}</Text>
+        <Text style={styles.container__cart__money}>
+          ${moneyInCart(props.item.name)}
+        </Text>
       </View>
       <View style={styles.container__info}>
         <View style={styles.container__info__left}>
@@ -162,22 +158,7 @@ const BodyFoodDetail = props => {
     </View>
   );
 };
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'increase':
-      return state.map(x =>
-        x.name === action.name ? {...x, amount: x.amount + 1} : {...x},
-      );
-    case 'decrease':
-      return state.map(x =>
-        x.name === action.name
-          ? {...x, amount: Math.max(x.amount - 1, 0)}
-          : {...x},
-      );
-    default:
-      return state;
-  }
-};
+
 const styles = StyleSheet.create({
   container: {
     padding: 60,
